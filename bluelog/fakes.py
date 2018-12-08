@@ -1,37 +1,50 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/python3
 """
-    :author: Grey Li (李辉)
-    :url: http://greyli.com
-    :copyright: © 2018 Grey Li <withlihui@gmail.com>
-    :license: MIT, see LICENSE for more details.
+@Author  : Zhaohui Mei(梅朝辉)
+@Email   : mzh.whut@gmail.com
+
+@Time    : 2018/11/19 21:32
+@File    : fakes.py
+@Version : 1.0
+@Interpreter: Python3.6.2
+@Software: PyCharm
+
+@Description: 构建虚拟数据函数
 """
 import random
-
 from faker import Faker
-from sqlalchemy.exc import IntegrityError
 
-from bluelog import db
-from bluelog.models import Admin, Category, Post, Comment, Link
+from bluelog.models import Admin, Category, Post, Comment
+from bluelog.extensions import db
+from sqlalchemy.exc import IntegrityError
 
 fake = Faker()
 
 
 def fake_admin():
+    """生成虚拟管理员信息"""
     admin = Admin(
         username='admin',
-        blog_title='Bluelog',
-        blog_sub_title="No, I'm the real thing.",
-        name='Mima Kirigoe',
-        about='Um, l, Mima Kirigoe, had a fun time as a member of CHAM...'
+        blog_title='Bluglog',
+        blog_sub_title="No,I'm the real thing.",
+        name='meizhaohui',
+        about='Enjoy your life'
     )
-    admin.set_password('helloflask')
+    # 注：当在models.py中Admin类中继承UserMixin时，此处会变黄
+    # 生成虚拟数据时，可将Admin类中的UserMixin去掉
+    admin.password = 'Helloflask'
     db.session.add(admin)
     db.session.commit()
 
 
 def fake_categories(count=10):
-    category = Category(name='Default')
+    """生成虚拟分类信息"""
+    category = Category(name='default')
     db.session.add(category)
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
 
     for i in range(count):
         category = Category(name=fake.word())
@@ -43,23 +56,25 @@ def fake_categories(count=10):
 
 
 def fake_posts(count=50):
+    """生成虚拟文章"""
     for i in range(count):
         post = Post(
             title=fake.sentence(),
-            body=fake.text(2000),
-            category=Category.query.get(random.randint(1, Category.query.count())),
+            body=fake.text(500),
             timestamp=fake.date_time_this_year()
         )
-
+        post.category = Category.query.get(
+            random.randint(1, Category.query.count()))
         db.session.add(post)
     db.session.commit()
 
 
 def fake_comments(count=500):
+    """生成虚拟评论"""
     for i in range(count):
         comment = Comment(
             author=fake.name(),
-            email=fake.email(),
+            email=fake.ascii_email(),
             site=fake.url(),
             body=fake.sentence(),
             timestamp=fake.date_time_this_year(),
@@ -70,10 +85,10 @@ def fake_comments(count=500):
 
     salt = int(count * 0.1)
     for i in range(salt):
-        # unreviewed comments
+        # 未审核评论
         comment = Comment(
             author=fake.name(),
-            email=fake.email(),
+            email=fake.ascii_email(),
             site=fake.url(),
             body=fake.sentence(),
             timestamp=fake.date_time_this_year(),
@@ -82,11 +97,11 @@ def fake_comments(count=500):
         )
         db.session.add(comment)
 
-        # from admin
+        # 管理员发表的评论
         comment = Comment(
-            author='Mima Kirigoe',
-            email='mima@example.com',
-            site='example.com',
+            author='meizhaohui',
+            email=fake.ascii_email(),
+            site=fake.url(),
             body=fake.sentence(),
             timestamp=fake.date_time_this_year(),
             from_admin=True,
@@ -96,26 +111,19 @@ def fake_comments(count=500):
         db.session.add(comment)
     db.session.commit()
 
-    # replies
+    # 回复
     for i in range(salt):
+        # 未审核评论
         comment = Comment(
             author=fake.name(),
-            email=fake.email(),
+            email=fake.ascii_email(),
             site=fake.url(),
             body=fake.sentence(),
             timestamp=fake.date_time_this_year(),
             reviewed=True,
-            replied=Comment.query.get(random.randint(1, Comment.query.count())),
-            post=Post.query.get(random.randint(1, Post.query.count()))
+            post=Post.query.get(random.randint(1, Post.query.count())),
+            replied=Comment.query.get(random.randint(1, Comment.query.count()))
         )
         db.session.add(comment)
     db.session.commit()
 
-
-def fake_links():
-    twitter = Link(name='Twitter', url='#')
-    facebook = Link(name='Facebook', url='#')
-    linkedin = Link(name='LinkedIn', url='#')
-    google = Link(name='Google+', url='#')
-    db.session.add_all([twitter, facebook, linkedin, google])
-    db.session.commit()

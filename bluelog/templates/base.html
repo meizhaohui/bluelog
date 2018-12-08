@@ -1,102 +1,156 @@
-{% from 'bootstrap/nav.html' import render_nav_item %}
+<!-- filename: templates/base.html -->
 <!DOCTYPE html>
+{% from 'bootstrap/nav.html' import render_nav_item %}
 <html lang="en">
 <head>
     {% block head %}
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>{% block title %}{% endblock title %} - {{ admin.blog_title|default('Blog Title') }}</title>
-        <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
-        <link rel="stylesheet"
-              href="{{ url_for('static', filename='css/%s.min.css' % request.cookies.get('theme', 'perfect_blue')) }}"
-              type="text/css">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" type="text/css">
+    <meta charset="UTF-8">
+    <!--shrink-to-fit=no的作用 -->
+    <!--在某些情况下，让你的代码只显示你指定的，而不会把你不想显示的进行缩放一起显示出来。-->
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1, shrink-to-fit=no">
+    <title>{% block title %}{% endblock %} - {{ admin.blog_title|default('Blog Title') }} </title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    {{ bootstrap.load_css() }}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/%s.min.css' % request.cookies.get('theme','perfect_blue')) }}"
+          type="text/css">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}"
+          type="text/css">
     {% endblock head %}
+    {{ ckeditor.load_code_theme() }}
 </head>
-<body>
-{% block nav %}
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('blog.index') }}">{{ admin.blog_title }}</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01"
-                    aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarColor01">
-                <ul class="navbar-nav mr-auto">
-                    {{ render_nav_item('blog.index', 'Home') }}
-                    {{ render_nav_item('blog.about', 'About') }}
-                </ul>
 
-                <ul class="nav navbar-nav navbar-right">
-                    {% if current_user.is_authenticated %}
-                        <li class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button"
-                               aria-haspopup="true"
-                               aria-expanded="false">
-                                New <span class="caret"></span>
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item" href="{{ url_for('admin.new_post') }}">Post</a>
-                                <a class="dropdown-item" href="{{ url_for('admin.new_category') }}">Category</a>
-                                <a class="dropdown-item" href="{{ url_for('admin.new_link') }}">Link</a>
-                            </div>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button"
-                               aria-haspopup="true"
-                               aria-expanded="false">
-                                Manage <span class="caret"></span>
+<body>
+
+{% block nav %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url_for('blog.index') }}">{{ admin.blog_title }}</a>
+        <!--<button class="navbar-toggle" type="button" data-toggle="collapse"-->
+                <!--data-target="#navbarColor01"-->
+                <!--aria-controls="navbarColor01"-->
+                <!--aria-expanded="false"-->
+                <!--aria-label="Toggle navigation">-->
+            <!--<span class="navbar-toggler-icon"></span>-->
+        <!--</button>-->
+        <div class="collapse navbar-collapse" id="navbarColor01">
+            <ul class="navbar-nav mr-auto">
+                {{ render_nav_item('blog.index', 'Home') }}
+                {{ render_nav_item('blog.about', 'About') }}
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                {% if current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                            New <span class="caret"></span>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{{ url_for('admin.new_post') }}">Post(文章)</a>
+                            <a class="dropdown-item" href="{{ url_for('admin.new_category') }}">Category(分类)</a>
+                        </div>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                            Manage <span class="caret"></span>
+                            {% if unread_comments %}
+                                <span class="badge badge-success">new</span>
+                            {% endif %}
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{{ url_for('admin.manage_post') }}">Post(文章)</a>
+                            <a class="dropdown-item" href="{{ url_for('admin.manage_category') }}">Category(分类)</a>
+                            <a class="dropdown-item" href="{{ url_for('admin.manage_comment') }}">Comment(评论)
                                 {% if unread_comments %}
-                                    <span class="badge badge-success">new</span>
+                                   <span class="badge badge-success">{{ unread_comments }}</span>
                                 {% endif %}
                             </a>
-                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item" href="{{ url_for('admin.manage_post') }}">Post</a>
-                                <a class="dropdown-item" href="{{ url_for('admin.manage_category') }}">Category</a>
-                                <a class="dropdown-item" href="{{ url_for('admin.manage_comment') }}">
-                                    Comment
-                                    {% if unread_comments %}
-                                        <span class="badge badge-success">{{ unread_comments }}</span>
-                                    {% endif %}
-                                </a>
-                                <a class="dropdown-item" href="{{ url_for('admin.manage_link') }}">Link</a>
-                            </div>
-                        </li>
-                        {{ render_nav_item('admin.settings', 'Settings') }}
-                    {% endif %}
-                </ul>
-            </div>
+                        </div>
+                    </li>
+                    {{ render_nav_item('admin.settings', 'Settings') }}
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                            {{ admin.name }}<span class="caret"></span>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a>
+                        </div>
+                    </li>
+                {% else %}
+                    <div>
+                        <ul class="navbar-nav mr-auto">
+                        <a class="nav nav-item nav-link" href="{{ url_for('auth.login') }}">Login</a>
+                        </ul>
+                    </div>
+                {% endif %}
+            </ul>
         </div>
-    </nav>
+    </div>
+</nav>
 {% endblock nav %}
 
+
 <main class="container">
-    {% for message in get_flashed_messages(with_categories=True) %}
-        <div class="alert alert-{{ message[0] }}" role="alert">
+    {# 原始消息闪现代码 #}
+    <!--{% for message in get_flashed_messages(with_categories=True) %}-->
+        <!--{{ message }}-->
+    <!--<div class="alert alert-{{ message[0] }}" role="alert">-->
+        <!--<button type="button" class="close" data-dismiss="alert">&times;</button>-->
+            <!--{{ message[1] }}-->
+    <!--</div>-->
+    <!--{% endfor %}-->
+
+    {# 改进消息闪现代码 #}
+    {% for category, message in get_flashed_messages(with_categories=True) %}
+        <div class="alert alert-{{ category }}" role="alert">
             <button type="button" class="close" data-dismiss="alert">&times;</button>
-            {{ message[1] }}
+                {{ message }}
+            {# 自动关闭提示方式1 #}
+            <script>
+                window.setTimeout(function () {
+                        $('[data-dismiss="alert"]').alert('close');
+                    },3000);
+            </script>
+
+            {# 自动关闭提示方式2   --注释内容
+            <script>
+                window.onload = function showflash() {
+                    layer.open({
+                        title: '{{ category }}',
+                        content: '{{ message }}',
+                        time: 3000,
+                    })
+                }
+            </script>
+            #}
         </div>
     {% endfor %}
-    {% block content %}{% endblock content %}
+
+    {% block content %}{% endblock content%}
+    <p class="float-right"><a id="bottom" href="#" title="Go Top">Go Top&uarr;</a></p>
     {% block footer %}
-        <footer>
-            <p class="float-left">
-                <small> &copy; 2018 <a href="http://greyli.com" title="Written by Grey Li">Grey Li</a> -
-                    <a href="https://github.com/greyli/bluelog" title="Fork me on GitHub">GitHub</a> -
-                    <a href="http://helloflask.com" title="A HelloFlask project">HelloFlask</a>
-                </small>
-            </p>
-            <p class="float-right">
-                <small>
-                    {% if current_user.is_authenticated %}
-                        <a href="{{ url_for('auth.logout', next=request.full_path) }}">Logout</a>
-                    {% else %}
-                        <a href="{{ url_for('auth.login', next=request.full_path) }}">Login</a>
-                    {% endif %}
-                </small>
-            </p>
-        </footer>
+    <footer>
+        <p class="float-left">
+            <small> &copy; 2018 <a href="http://greyli.com" title="Written by Grey Li">Grey Li</a> /
+                <a href="https://github.com/greyli/bluelog" title="Fork me on GitHub">GitHub</a> /
+                <a href="http://helloflask.com" title="A HelloFlask project">HelloFlask</a>
+            </small>
+        </p>
+
+        <p class="float-right">
+            <small>
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('auth.logout', next=request.full_path) }}">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login', next=request.full_path) }}">Login</a>
+                {% endif %}
+            </small>
+        </p>
+
+    </footer>
+
     {% endblock footer %}
 </main>
 
@@ -104,8 +158,12 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.2.1.slim.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='layer/layer.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {# 加载mement.js文件 #}
     {{ moment.include_moment(local_js=url_for('static', filename='js/moment-with-locales.min.js')) }}
-{% endblock %}
+    {# moment自动探测客户端语言设置 #}
+    {{ moment.locale(auto_detect=True) }}
+{% endblock scripts %}
 </body>
 </html>

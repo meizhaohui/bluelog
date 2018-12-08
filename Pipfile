@@ -1,13 +1,7 @@
 [[source]]
-url = "https://pypi.org/simple"
+url = "https://mirrors.aliyun.com/pypi/simple"
 verify_ssl = true
 name = "pypi"
-
-[dev-packages]
-coverage = "*"
-watchdog = "*"
-"flake8" = "*"
-faker = "*"
 
 [packages]
 flask = "*"
@@ -19,7 +13,6 @@ flask-moment = "*"
 python-dotenv = "*"
 bootstrap-flask = "*"
 flask-login = "*"
-flask-debugtoolbar = "*"
-gunicorn = "*"
-"psycopg2" = "*"
 flask-migrate = "*"
+faker = "*"
+pymysql = "*"

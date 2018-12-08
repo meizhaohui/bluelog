@@ -1,12 +1,19 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/python3
 """
-    :author: Grey Li (李辉)
-    :url: http://greyli.com
-    :copyright: © 2018 Grey Li <withlihui@gmail.com>
-    :license: MIT, see LICENSE for more details.
+@Author  : Zhaohui Mei(梅朝辉)
+@Email   : mzh.whut@gmail.com
+
+@Time    : 2018/11/18 20:13
+@File    : auth.py
+@Version : 1.0
+@Interpreter: Python3.6.2
+@Software: PyCharm
+
+@Description: 认证蓝图
 """
-from flask import render_template, flash, redirect, url_for, Blueprint
-from flask_login import login_user, logout_user, login_required, current_user
+
+from flask import redirect, url_for, Blueprint, flash, render_template
+from flask_login import current_user, login_user, logout_user, login_required
 
 from bluelog.forms import LoginForm
 from bluelog.models import Admin
@@ -15,31 +22,35 @@ from bluelog.utils import redirect_back
 auth_bp = Blueprint('auth', __name__)
 
 
-@auth_bp.route('/login', methods=['GET', 'POST'])
+@auth_bp.route('/login/', methods=['GET', 'POST'])
 def login():
+    """登陆视图"""
     if current_user.is_authenticated:
+        # 如果用户认证通过，则跳转到博客首页
         return redirect(url_for('blog.index'))
 
+    # 没有认证通过的话，则需要用户登陆
     form = LoginForm()
     if form.validate_on_submit():
         username = form.username.data
         password = form.password.data
         remember = form.remember.data
-        admin = Admin.query.first()
+        admin = Admin.query.filter_by(username=username).first()
         if admin:
-            if username == admin.username and admin.validate_password(password):
-                login_user(admin, remember)
+            if admin.validate_password(password):
+                login_user(admin, remember)  # 登陆用户
                 flash('Welcome back.', 'info')
-                return redirect_back()
-            flash('Invalid username or password.', 'warning')
+                return redirect_back()  # 返回上一个页面
+            flash('Invalid password.', 'warning')
         else:
-            flash('No account.', 'warning')
+            flash('Invalid username.', 'warning')
     return render_template('auth/login.html', form=form)
 
 
-@auth_bp.route('/logout')
+@auth_bp.route('/logout/')
 @login_required
 def logout():
-    logout_user()
+    """注销视图"""
+    logout_user()  # 注销用户
     flash('Logout success.', 'info')
-    return redirect_back()
+    return redirect_back()  # 返回上一个页面

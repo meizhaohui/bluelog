@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% from 'bootstrap/pagination.html' import render_pager %}
+{% from 'bootstrap/pagination.html' import render_pagination %}
 
 {% block title %}Home{% endblock %}
 
@@ -7,12 +7,24 @@
     <div class="page-header">
         <h1 class="display-3">{{ admin.blog_title|default('Blog Title') }}</h1>
         <h4 class="text-muted">&nbsp;{{ admin.blog_sub_title|default('Blog Subtitle') }}</h4>
+        <div class="col-lg-6">
+            <form method="post">
+                <div class="input-group">
+                    {{ search_form.csrf_token }}
+                    {{ search_form.key_word }}
+                    <span class="input-group-btn">
+                        {{  search_form.submit }}
+                    </span>
+                </div>
+            </form>
+          </div>
     </div>
     <div class="row">
         <div class="col-sm-8">
             {% include 'blog/_posts.html' %}
             {% if posts %}
-                <div class="page-footer">{{ render_pager(pagination) }}</div>
+                {# 分页对象 #}
+                <div class="page-footer">{{ render_pagination(pagination) }}</div>
             {% endif %}
         </div>
         <div class="col-sm-4 sidebar">

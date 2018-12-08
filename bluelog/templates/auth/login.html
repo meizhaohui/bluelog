@@ -1,17 +1,16 @@
 {% extends 'base.html' %}
 {% from 'bootstrap/form.html' import render_form %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Login(登陆){% endblock %}
 
 {% block content %}
     <div class="container h-100">
-        <div class="row h-100 page-header justify-content-center align-items-center">
-            <h1>Log in</h1>
+        <div class="row page-header justify-content-center align-items-center col-sm-8">
+            <h1>Login</h1>
         </div>
-        <div class="row h-100 justify-content-center align-items-center">
-            {{ render_form(form, extra_classes='col-6') }}
+        <div class="row justify-content-center align-items-center col-sm-8">
+            {{ render_form(form) }}
         </div>
     </div>
 {% endblock %}
-
-{% block footer %}{% endblock %}
+{% block footer %}{% endblock footer %}
